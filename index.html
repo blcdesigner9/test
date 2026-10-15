@@ -1028,15 +1028,76 @@ body{margin:0;font-family:system-ui,-apple-system,"PingFang TC","Noto Sans TC","
 }
 
 
-/* v81：暫時隱藏左側頁面列表 */
+/* v82：恢復左側頁面列表 */
 .layout{
-  grid-template-columns:1fr;
+  grid-template-columns:280px 1fr;
+}
+.sidebar{
+  display:block !important;
+}
+
+
+/* v84：MP3 播放按鈕與音訊進度條上下分離 */
+.med-mp3-demo{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+.med-mp3-play-btn{
+  width:78px;
+  height:78px;
+  margin:4px auto 18px;
+  padding:0 0 0 5px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:0;
+  border-radius:50%;
+  background:var(--accent);
+  color:#fff;
+  font-size:34px;
+  line-height:1;
+  cursor:pointer;
+  box-shadow:0 5px 14px rgba(0,0,0,.12);
+}
+.med-mp3-play-btn.is-playing{
+  padding-left:0;
+  font-size:30px;
+}
+.med-mp3-progress-wrap{
+  width:100%;
+}
+.med-mp3-progress{
+  display:block;
+  width:100%;
+  height:6px;
+  margin:0;
+  cursor:pointer;
+  accent-color:var(--accent);
+}
+.med-mp3-time{
+  display:flex;
+  justify-content:space-between;
+  margin-top:6px;
+  font-size:10px;
+  color:#888;
+}
+.med-mp3-demo audio{
+  display:none;
+}
+
+</style>
+
+<style id="hide-prototype-sidebar-v94">
+/* v94：隱藏左側頁面列表 */
+.layout{
+  grid-template-columns:1fr !important;
 }
 .sidebar{
   display:none !important;
 }
-
 </style>
+
 </head>
 <body>
 <div class="pagebar">
@@ -1345,10 +1406,10 @@ body{margin:0;font-family:system-ui,-apple-system,"PingFang TC","Noto Sans TC","
   <div class="status"><span>9:41</span><span>●●● 100%</span></div>
   <div class="site-head"><div class="site-title">各項服務</div><button class="menu-btn" onclick="openMenu()">☰</button></div>
   <div class="content">
-    <div class="card service" onclick="openMeditationReminder()"><div class="icon">🧘</div><div><h4>禪修</h4><p>計時＋禪修專屬日／週／月紀錄</p></div></div>
-    <div class="card service" onclick="openBowReminder()"><div class="icon">🙏</div><div><h4>拜佛</h4><p>計數＋拜佛專屬日／週／月紀錄</p></div></div>
-    <div class="card service" onclick="go('chant-home')"><div class="icon">📿</div><div><h4>持咒</h4><p>計數＋持咒專屬日／週／月紀錄</p></div></div>
-    <div class="card service" onclick="go('buddha-home')"><div class="icon">🪷</div><div><h4>念佛</h4><p>計數＋念佛專屬日／週／月紀錄</p></div></div>
+    <div class="card service" onclick="openMeditationReminder()"><div class="icon">🧘</div><div><h4>禪修</h4></div></div>
+    <div class="card service" onclick="openBowReminder()"><div class="icon">🙏</div><div><h4>拜佛</h4></div></div>
+    <div class="card service" onclick="go('chant-home')"><div class="icon">📿</div><div><h4>持咒</h4></div></div>
+    <div class="card service" onclick="go('buddha-home')"><div class="icon">🪷</div><div><h4>念佛</h4></div></div>
   </div>
   <footer class="footer-brand"><div class="footer-logo">🪷</div><strong>線上共修</strong><small>各項服務</small></footer>
 </section>
@@ -1365,27 +1426,6 @@ body{margin:0;font-family:system-ui,-apple-system,"PingFang TC","Noto Sans TC","
     </div>
 
     <button class="btn" onclick="go('med-setup')">＋ 開始禪修計時</button>
-
-    <div class="section-title">修行紀錄</div>
-    <div class="grid4" style="grid-template-columns:repeat(3,1fr)">
-      <div class="card center" onclick="go('med-day')" style="cursor:pointer">
-        <h4>每日</h4><p>修行紀錄</p>
-      </div>
-      <div class="card center" onclick="go('med-week')" style="cursor:pointer;background:#f6edd1">
-        <h4>每週</h4><p>修行紀錄</p>
-      </div>
-      <div class="card center" onclick="go('med-month')" style="cursor:pointer;background:#eef2cf">
-        <h4>每月</h4><p>修行紀錄</p>
-      </div>
-    </div>
-
-    <div class="card service" onclick="go('med-ledger')" style="cursor:pointer;margin-top:14px">
-      <div class="icon">☷</div>
-      <div>
-        <h4>流水帳紀錄</h4>
-        <p>查看每一次禪修的開始時間、結束時間、設定與實際修行時間</p>
-      </div>
-    </div>
   </div>
   <footer class="footer-brand"><div class="footer-logo">🪷</div><strong>線上共修</strong><small>禪修專區</small></footer>
 </section>
@@ -1457,9 +1497,27 @@ body{margin:0;font-family:system-ui,-apple-system,"PingFang TC","Noto Sans TC","
   <div class="med-practice-content">
     <div class="med-mp3-demo">
       <div class="med-mp3-label">MP3 音訊</div>
-      <audio controls preload="none" aria-label="禪修引導 MP3 音訊示意">
-        您的瀏覽器不支援音訊播放。
-      </audio>
+
+      <button class="med-mp3-play-btn"
+              id="medMp3PlayBtn"
+              onclick="toggleMedMp3Player()"
+              aria-label="播放禪修引導音訊">▶</button>
+
+      <div class="med-mp3-progress-wrap">
+        <input class="med-mp3-progress"
+               id="medMp3Progress"
+               type="range"
+               min="0"
+               max="100"
+               value="0"
+               aria-label="音訊播放進度">
+        <div class="med-mp3-time">
+          <span>00:00</span>
+          <span>10:00</span>
+        </div>
+      </div>
+
+      <audio id="medMp3Audio" preload="none" aria-label="禪修引導 MP3 音訊示意"></audio>
     </div>
 
 <div class="med-figure" aria-label="禪修動作示意">
@@ -1488,7 +1546,6 @@ body{margin:0;font-family:system-ui,-apple-system,"PingFang TC","Noto Sans TC","
     <div class="success">✓</div>
     <div class="success-title">本次禪修完成</div>
     <p class="sub" id="medDoneText">已完成本次禪修並加入紀錄。</p>
-    <button class="btn" onclick="go('med-home')">回到禪修總覽</button>
     <button class="btn secondary" onclick="go('services')">回首頁</button>
   </div>
   <footer class="footer-brand"><div class="footer-logo">🪷</div><strong>線上共修</strong><small>禪修完成</small></footer>
@@ -1620,27 +1677,6 @@ body{margin:0;font-family:system-ui,-apple-system,"PingFang TC","Noto Sans TC","
     </div>
 
     <button class="btn" onclick="go('bow-setup')">＋ 開始拜佛計數</button>
-
-    <div class="section-title">修行紀錄</div>
-    <div class="grid4" style="grid-template-columns:repeat(3,1fr)">
-      <div class="card center" onclick="go('bow-day')" style="cursor:pointer">
-        <h4>每日</h4><p>修行紀錄</p>
-      </div>
-      <div class="card center" onclick="go('bow-week')" style="cursor:pointer;background:#f6edd1">
-        <h4>每週</h4><p>修行紀錄</p>
-      </div>
-      <div class="card center" onclick="go('bow-month')" style="cursor:pointer;background:#eef2cf">
-        <h4>每月</h4><p>修行紀錄</p>
-      </div>
-    </div>
-
-    <div class="card service" onclick="go('bow-ledger')" style="cursor:pointer;margin-top:14px">
-      <div class="icon">☷</div>
-      <div>
-        <h4>流水帳紀錄</h4>
-        <p>查看每一次拜佛的開始時間、結束時間、設定、拜佛次數與迴向</p>
-      </div>
-    </div>
   </div>
   <footer class="footer-brand"><div class="footer-logo">🪷</div><strong>線上共修</strong><small>拜佛專區</small></footer>
 </section>
@@ -1669,10 +1705,6 @@ body{margin:0;font-family:system-ui,-apple-system,"PingFang TC","Noto Sans TC","
     </div>
 
     <button class="btn" onclick="startBowCount()">開始</button>
-
-    <button class="btn secondary" onclick="go('bow-home')" style="margin-top:10px">
-      查閱紀錄
-    </button>
   </div>
 
   <footer class="footer-brand">
@@ -1736,7 +1768,7 @@ body{margin:0;font-family:system-ui,-apple-system,"PingFang TC","Noto Sans TC","
 
       <div class="bow-done-links">
         <button onclick="go('services')">回首頁</button>
-        <button onclick="go('bow-home')">查閱紀錄</button>
+        <button onclick="go('bow-record-overview')">查閱紀錄</button>
       </div>
     </div>
 
@@ -1789,7 +1821,7 @@ body{margin:0;font-family:system-ui,-apple-system,"PingFang TC","Noto Sans TC","
     <div class="dedication-after-actions">
       <button onclick="go('services')">回首頁</button>
       <button onclick="go('bow-setup')">繼續拜佛</button>
-      <button onclick="go('bow-home')">查閱紀錄</button>
+      <button onclick="go('bow-record-overview')">查閱紀錄</button>
       <button onclick="go('bow-ledger')">查閱迴向</button>
     </div>
   </div>
@@ -2043,27 +2075,6 @@ body{margin:0;font-family:system-ui,-apple-system,"PingFang TC","Noto Sans TC","
     </div>
 
     <button class="btn" onclick="go('chant-select')">＋ 開始持咒計數</button>
-
-    <div class="section-title">修行紀錄</div>
-    <div class="grid4" style="grid-template-columns:repeat(3,1fr)">
-      <div class="card center" onclick="go('chant-day')" style="cursor:pointer">
-        <h4>每日</h4><p>修行紀錄</p>
-      </div>
-      <div class="card center" onclick="go('chant-week')" style="cursor:pointer;background:#f6edd1">
-        <h4>每週</h4><p>修行紀錄</p>
-      </div>
-      <div class="card center" onclick="go('chant-month')" style="cursor:pointer;background:#eef2cf">
-        <h4>每月</h4><p>修行紀錄</p>
-      </div>
-    </div>
-
-    <div class="card service" onclick="go('chant-ledger')" style="cursor:pointer;margin-top:14px">
-      <div class="icon">☷</div>
-      <div>
-        <h4>流水帳紀錄</h4>
-        <p>查看每一次持咒的開始時間、結束時間、設定與持咒次數</p>
-      </div>
-    </div>
   </div>
   <footer class="footer-brand"><div class="footer-logo">🪷</div><strong>線上共修</strong><small>持咒專區</small></footer>
 </section>
@@ -2146,7 +2157,7 @@ body{margin:0;font-family:system-ui,-apple-system,"PingFang TC","Noto Sans TC","
       </div>
     </div>
 
-    <button class="btn" onclick="openChantSaveModal()">儲存本次紀錄</button>
+    <button class="btn" onclick="openChantSaveModal()">輸入本次次數</button>
   </div>
 
   <footer class="footer-brand">
@@ -2181,7 +2192,7 @@ body{margin:0;font-family:system-ui,-apple-system,"PingFang TC","Noto Sans TC","
 
       <div class="bow-done-links">
         <button onclick="go('services')">回首頁</button>
-        <button onclick="go('chant-home')">查閱紀錄</button>
+        <button onclick="go('chant-record-overview')">查閱紀錄</button>
       </div>
     </div>
   </div>
@@ -2228,7 +2239,7 @@ body{margin:0;font-family:system-ui,-apple-system,"PingFang TC","Noto Sans TC","
     <div class="dedication-after-actions">
       <button onclick="go('services')">回首頁</button>
       <button onclick="go('chant-select')">繼續持咒</button>
-      <button onclick="go('chant-home')">查閱紀錄</button>
+      <button onclick="go('chant-record-overview')">查閱紀錄</button>
       <button onclick="go('chant-ledger')">查閱迴向</button>
     </div>
   </div>
@@ -2397,27 +2408,6 @@ body{margin:0;font-family:system-ui,-apple-system,"PingFang TC","Noto Sans TC","
     </div>
 
     <button class="btn" onclick="go('buddha-select')">＋ 開始念佛計數</button>
-
-    <div class="section-title">修行紀錄</div>
-    <div class="grid4" style="grid-template-columns:repeat(3,1fr)">
-      <div class="card center" onclick="go('buddha-day')" style="cursor:pointer">
-        <h4>每日</h4><p>修行紀錄</p>
-      </div>
-      <div class="card center" onclick="go('buddha-week')" style="cursor:pointer;background:#f6edd1">
-        <h4>每週</h4><p>修行紀錄</p>
-      </div>
-      <div class="card center" onclick="go('buddha-month')" style="cursor:pointer;background:#eef2cf">
-        <h4>每月</h4><p>修行紀錄</p>
-      </div>
-    </div>
-
-    <div class="card service" onclick="go('buddha-ledger')" style="cursor:pointer;margin-top:14px">
-      <div class="icon">☷</div>
-      <div>
-        <h4>流水帳紀錄</h4>
-        <p>查看每一次念佛的開始時間、結束時間、設定與念佛次數</p>
-      </div>
-    </div>
   </div>
   <footer class="footer-brand"><div class="footer-logo">🪷</div><strong>線上共修</strong><small>念佛專區</small></footer>
 </section>
@@ -2545,7 +2535,7 @@ body{margin:0;font-family:system-ui,-apple-system,"PingFang TC","Noto Sans TC","
 
       <div class="bow-done-links">
         <button onclick="go('services')">回首頁</button>
-        <button onclick="go('buddha-home')">查閱紀錄</button>
+        <button onclick="go('buddha-record-overview')">查閱紀錄</button>
       </div>
     </div>
   </div>
@@ -2593,7 +2583,7 @@ body{margin:0;font-family:system-ui,-apple-system,"PingFang TC","Noto Sans TC","
     <div class="dedication-after-actions">
       <button onclick="go('services')">回首頁</button>
       <button onclick="go('buddha-select')">繼續念佛</button>
-      <button onclick="go('buddha-home')">查閱紀錄</button>
+      <button onclick="go('buddha-record-overview')">查閱紀錄</button>
       <button onclick="go('buddha-ledger')">查閱迴向</button>
     </div>
   </div>
@@ -2861,6 +2851,108 @@ body{margin:0;font-family:system-ui,-apple-system,"PingFang TC","Noto Sans TC","
 </section>
 
 <!-- 全站總紀錄 -->
+
+<!-- v88：由全站總紀錄進入的各服務紀錄總覽（沿用 v81 總覽結構） -->
+<section class="screen" id="med-record-overview">
+  <div class="status"><span>9:41</span><span>●●● 100%</span></div>
+  <div class="toprow">
+    <button class="unit-menu-btn" onclick="openMenu()" aria-label="開啟網站選單">☰</button>
+    <button class="back" onclick="go('records')">‹</button><h2>禪修總覽</h2>
+  </div>
+  <div class="content">
+    <div class="card center" style="background:#fbf6df">
+      <p class="note" style="margin:0">已修行時間</p>
+      <div style="font-size:34px;font-weight:800;margin-top:6px">1,280 <span style="font-size:13px;font-weight:500">分鐘</span></div>
+    </div>
+    <button class="btn" onclick="go('med-setup')">前往禪修計時</button>
+    <div class="section-title">修行紀錄</div>
+    <div class="grid4" style="grid-template-columns:repeat(3,1fr)">
+      <div class="card center" onclick="go('med-day')" style="cursor:pointer"><h4>每日</h4><p>修行紀錄</p></div>
+      <div class="card center" onclick="go('med-week')" style="cursor:pointer;background:#f6edd1"><h4>每週</h4><p>修行紀錄</p></div>
+      <div class="card center" onclick="go('med-month')" style="cursor:pointer;background:#eef2cf"><h4>每月</h4><p>修行紀錄</p></div>
+    </div>
+    <div class="card service" onclick="go('med-ledger')" style="cursor:pointer;margin-top:14px">
+      <div class="icon">☷</div><div><h4>流水帳紀錄</h4><p>查看每一次禪修的開始時間、結束時間、設定與實際修行時間</p></div>
+    </div>
+  </div>
+  <footer class="footer-brand"><div class="footer-logo">🪷</div><strong>線上共修</strong><small>禪修紀錄總覽</small></footer>
+</section>
+
+<section class="screen" id="bow-record-overview">
+  <div class="status"><span>9:41</span><span>●●● 100%</span></div>
+  <div class="toprow">
+    <button class="unit-menu-btn" onclick="openMenu()" aria-label="開啟網站選單">☰</button>
+    <button class="back" onclick="go('records')">‹</button><h2>拜佛總覽</h2>
+  </div>
+  <div class="content">
+    <div class="card center" style="background:#fbf6df">
+      <p class="note" style="margin:0">已拜佛次數</p>
+      <div style="font-size:34px;font-weight:800;margin-top:6px">74 <span style="font-size:13px;font-weight:500">次</span></div>
+    </div>
+    <button class="btn" onclick="go('bow-setup')">前往拜佛計數</button>
+    <div class="section-title">修行紀錄</div>
+    <div class="grid4" style="grid-template-columns:repeat(3,1fr)">
+      <div class="card center" onclick="go('bow-day')" style="cursor:pointer"><h4>每日</h4><p>修行紀錄</p></div>
+      <div class="card center" onclick="go('bow-week')" style="cursor:pointer;background:#f6edd1"><h4>每週</h4><p>修行紀錄</p></div>
+      <div class="card center" onclick="go('bow-month')" style="cursor:pointer;background:#eef2cf"><h4>每月</h4><p>修行紀錄</p></div>
+    </div>
+    <div class="card service" onclick="go('bow-ledger')" style="cursor:pointer;margin-top:14px">
+      <div class="icon">☷</div><div><h4>流水帳紀錄</h4><p>查看每一次拜佛的開始時間、結束時間、設定、拜佛次數與迴向</p></div>
+    </div>
+  </div>
+  <footer class="footer-brand"><div class="footer-logo">🪷</div><strong>線上共修</strong><small>拜佛紀錄總覽</small></footer>
+</section>
+
+<section class="screen" id="chant-record-overview">
+  <div class="status"><span>9:41</span><span>●●● 100%</span></div>
+  <div class="toprow">
+    <button class="unit-menu-btn" onclick="openMenu()" aria-label="開啟網站選單">☰</button>
+    <button class="back" onclick="go('records')">‹</button><h2>持咒總覽</h2>
+  </div>
+  <div class="content">
+    <div class="card center" style="background:#fbf6df">
+      <p class="note" style="margin:0">已持咒次數</p>
+      <div style="font-size:34px;font-weight:800;margin-top:6px">112 <span style="font-size:13px;font-weight:500">次</span></div>
+    </div>
+    <button class="btn" onclick="go('chant-select')">前往持咒計數</button>
+    <div class="section-title">修行紀錄</div>
+    <div class="grid4" style="grid-template-columns:repeat(3,1fr)">
+      <div class="card center" onclick="go('chant-day')" style="cursor:pointer"><h4>每日</h4><p>修行紀錄</p></div>
+      <div class="card center" onclick="go('chant-week')" style="cursor:pointer;background:#f6edd1"><h4>每週</h4><p>修行紀錄</p></div>
+      <div class="card center" onclick="go('chant-month')" style="cursor:pointer;background:#eef2cf"><h4>每月</h4><p>修行紀錄</p></div>
+    </div>
+    <div class="card service" onclick="go('chant-ledger')" style="cursor:pointer;margin-top:14px">
+      <div class="icon">☷</div><div><h4>流水帳紀錄</h4><p>查看每一次持咒的開始時間、結束時間、設定與持咒次數</p></div>
+    </div>
+  </div>
+  <footer class="footer-brand"><div class="footer-logo">🪷</div><strong>線上共修</strong><small>持咒紀錄總覽</small></footer>
+</section>
+
+<section class="screen" id="buddha-record-overview">
+  <div class="status"><span>9:41</span><span>●●● 100%</span></div>
+  <div class="toprow">
+    <button class="unit-menu-btn" onclick="openMenu()" aria-label="開啟網站選單">☰</button>
+    <button class="back" onclick="go('records')">‹</button><h2>念佛總覽</h2>
+  </div>
+  <div class="content">
+    <div class="card center" style="background:#fbf6df">
+      <p class="note" style="margin:0">已念佛次數</p>
+      <div style="font-size:34px;font-weight:800;margin-top:6px">93 <span style="font-size:13px;font-weight:500">次</span></div>
+    </div>
+    <button class="btn" onclick="go('buddha-select')">前往念佛計數</button>
+    <div class="section-title">修行紀錄</div>
+    <div class="grid4" style="grid-template-columns:repeat(3,1fr)">
+      <div class="card center" onclick="go('buddha-day')" style="cursor:pointer"><h4>每日</h4><p>修行紀錄</p></div>
+      <div class="card center" onclick="go('buddha-week')" style="cursor:pointer;background:#f6edd1"><h4>每週</h4><p>修行紀錄</p></div>
+      <div class="card center" onclick="go('buddha-month')" style="cursor:pointer;background:#eef2cf"><h4>每月</h4><p>修行紀錄</p></div>
+    </div>
+    <div class="card service" onclick="go('buddha-ledger')" style="cursor:pointer;margin-top:14px">
+      <div class="icon">☷</div><div><h4>流水帳紀錄</h4><p>查看每一次念佛的開始時間、結束時間、設定與念佛次數</p></div>
+    </div>
+  </div>
+  <footer class="footer-brand"><div class="footer-logo">🪷</div><strong>線上共修</strong><small>念佛紀錄總覽</small></footer>
+</section>
+
 <section class="screen" id="records">
   <div class="status"><span>9:41</span><span>●●● 100%</span></div>
   <div class="site-head"><div class="site-title">總紀錄</div><button class="menu-btn" onclick="openMenu()">☰</button></div>
@@ -2869,16 +2961,16 @@ body{margin:0;font-family:system-ui,-apple-system,"PingFang TC","Noto Sans TC","
       <h4>全部共修紀錄</h4><div style="font-size:42px;font-weight:800">365</div><p>紀錄筆數（各項單位分開顯示）</p>
     </div>
     <div class="grid2">
-      <button class="stat record-stat-link" onclick="go('med-home')" aria-label="前往禪修總覽">
+      <button class="stat record-stat-link" onclick="go('med-record-overview')" aria-label="前往禪修總覽">
         <span>禪修</span><b>1,280</b><span>分鐘</span><small>查看總覽 ›</small>
       </button>
-      <button class="stat record-stat-link" onclick="go('bow-home')" aria-label="前往拜佛總覽">
+      <button class="stat record-stat-link" onclick="go('bow-record-overview')" aria-label="前往拜佛總覽">
         <span>拜佛</span><b>74</b><span>次</span><small>查看總覽 ›</small>
       </button>
-      <button class="stat record-stat-link" onclick="go('chant-home')" aria-label="前往持咒總覽">
+      <button class="stat record-stat-link" onclick="go('chant-record-overview')" aria-label="前往持咒總覽">
         <span>持咒</span><b>112</b><span>次</span><small>查看總覽 ›</small>
       </button>
-      <button class="stat record-stat-link" onclick="go('buddha-home')" aria-label="前往念佛總覽">
+      <button class="stat record-stat-link" onclick="go('buddha-record-overview')" aria-label="前往念佛總覽">
         <span>念佛</span><b>93</b><span>次</span><small>查看總覽 ›</small>
       </button>
     </div>
@@ -2996,7 +3088,7 @@ body{margin:0;font-family:system-ui,-apple-system,"PingFang TC","Noto Sans TC","
     <div class="card center"><div style="font-size:50px">○</div><h4>會員名稱</h4><p>member@example.com</p></div>
     <div class="row"><span>個人資料</span><span>›</span></div>
     <div class="row"><span>修改密碼</span><span>›</span></div>
-    <div class="row"><span>通知設定</span><span>›</span></div>
+    
   </div>
   <footer class="footer-brand"><div class="footer-logo">🪷</div><strong>線上共修</strong><small>個人中心</small></footer>
 </section>
@@ -3682,6 +3774,16 @@ function filterDedicationRecords(type){
 
   const empty = document.getElementById('dedicationEmpty');
   if(empty) empty.style.display = visibleCount ? 'none' : 'block';
+}
+
+
+function toggleMedMp3Player(){
+  const btn = document.getElementById('medMp3PlayBtn');
+  if(!btn) return;
+
+  const playing = btn.classList.toggle('is-playing');
+  btn.textContent = playing ? 'Ⅱ' : '▶';
+  btn.setAttribute('aria-label', playing ? '暫停禪修引導音訊' : '播放禪修引導音訊');
 }
 
 </script>
